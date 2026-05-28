@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1779910065845,
+      "tag": "0000_certain_rumiko_fujikawa",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779910961203,
+      "tag": "0001_panoramic_felicia_hardy",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779912937633,
+      "tag": "0002_cynical_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779993706258,
+      "tag": "0003_ambitious_warbound",
+      "breakpoints": true
+    }
+  ]
+}
