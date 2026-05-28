@@ -1,0 +1,8 @@
+{
+	"name": "hono-app",
+	"main": "src/index.ts",
+	"compatibility_date": "<COMPATIBILITY_DATE>",
+	"observability": {
+		"enabled": true,
+	},
+}

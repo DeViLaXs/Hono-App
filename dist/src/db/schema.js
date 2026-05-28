@@ -72,7 +72,7 @@ export const games = pgTable("games", {
     title: text("title").notNull(),
     description: text("description").notNull(),
     price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-    size: real("size").notNull(),
+    size: numeric("size", { precision: 10, scale: 2 }).notNull(),
     sizeType: gameSizeType("size_type").notNull(),
     publisher: text("publisher").notNull(),
     rating: numeric("rating", {

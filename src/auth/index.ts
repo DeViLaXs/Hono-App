@@ -1,41 +1,43 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { expo } from "@better-auth/expo";
-import { db } from "../db/index.js";
+import { createDb } from "../db/index.js";
 import * as schema from "../db/schema.js";
 
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg",
-    schema,
-  }),
+type AuthEnv = {
+  DATABASE_URL: string;
+  BETTER_AUTH_URL: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+};
 
-  baseURL: process.env.BETTER_AUTH_URL, 
-  plugins:[
-    expo(),
-  ],
+export function createAuth(env: AuthEnv) {
+  const db = createDb(env.DATABASE_URL);
 
-//   account: {
-//     accountLinking: {
-//       enabled: true,
-//       trustedProviders: ["google"], // 👈 Tells Better Auth to automatically link Google accounts
-//     },
-//   },
+  return betterAuth({
+    database: drizzleAdapter(db, {
+      provider: "pg",
+      schema,
+    }),
 
-  socialProviders:{
-    google:{
-        clientId:process.env.GOOGLE_CLIENT_ID as string,
-        clientSecret:process.env.GOOGLE_CLIENT_SECRET as string
+    baseURL: env.BETTER_AUTH_URL,
+    plugins: [expo()],
+
+    socialProviders: {
+      google: {
+        clientId: env.GOOGLE_CLIENT_ID,
+        clientSecret: env.GOOGLE_CLIENT_SECRET,
+      },
     },
-  },
 
-  trustedOrigins: ["*"],
+    trustedOrigins: ["*"],
 
-  advanced: {
-    disableCSRFCheck: true,
-  },
+    advanced: {
+      disableCSRFCheck: true,
+    },
 
-  emailAndPassword: {
-    enabled: true,
-  },
-});
+    emailAndPassword: {
+      enabled: true,
+    },
+  });
+}

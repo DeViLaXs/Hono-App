@@ -1,37 +1,42 @@
-import "dotenv/config";
-import { Hono } from "hono";
-import { serve } from "@hono/node-server";
-import { cors } from "hono/cors";
-import { auth } from "./auth/index.js";
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { createAuth } from './auth/index.js';
+import { createDb } from './db/index.js';
+import { games } from './db/schema.js';
 const app = new Hono();
-app.use("*", cors({
-    origin: "*",
-    allowHeaders: ["Content-Type", "Authorization"],
-    allowMethods: ["GET", "POST"],
+app.use('*', cors({
+    origin: '*',
+    allowHeaders: ['Content-Type', 'Authorization'],
+    allowMethods: ['GET', 'POST'],
 }));
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
+app.on(['POST', 'GET'], '/api/auth/*', (c) => {
+    const auth = createAuth(c.env);
     return auth.handler(c.req.raw);
 });
-app.get("/me", async (c) => {
+app.get('/me', async (c) => {
+    const auth = createAuth(c.env);
     const session = await auth.api.getSession({
         headers: c.req.raw.headers,
     });
     if (!session) {
         return c.json({
-            error: "Unauthorized",
+            error: 'Unauthorized',
         }, 401);
     }
     return c.json({
         user: session.user,
     });
 });
-app.get("/", (c) => {
+app.get('/', (c) => {
     return c.json({
-        message: "Backend working 🚀",
+        message: 'Backend working',
     });
 });
-serve({
-    fetch: app.fetch,
-    port: 3000,
+app.get('/games', async (c) => {
+    const db = createDb(c.env.DATABASE_URL);
+    const gamesData = await db.select().from(games);
+    return c.json({
+        games: gamesData,
+    });
 });
-console.log("Server running on http://localhost:3000");
+export default app;
