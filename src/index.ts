@@ -23,8 +23,18 @@ app.use(
 )
 
 app.on(['POST', 'GET'], '/api/auth/*', (c) => {
-  const auth = createAuth(c.env)
-  return auth.handler(c.req.raw)
+  try {
+    const auth = createAuth(c.env)
+    return auth.handler(c.req.raw)
+  } catch (error) {
+    console.error('Auth route crashed:', error)
+    return c.json(
+      {
+        error: 'Auth route internal error',
+      },
+      500,
+    )
+  }
 })
 
 app.get('/me', async (c) => {
