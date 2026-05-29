@@ -5,6 +5,16 @@ import { createDb } from "../db/index.js";
 import * as schema from "../db/schema.js";
 export function createAuth(env) {
     const db = createDb(env.DATABASE_URL);
+    const expoScheme = env.EXPO_APP_SCHEME?.trim();
+    const trustedOrigins = [
+        env.BETTER_AUTH_URL,
+        expoScheme ? `${expoScheme}://` : undefined,
+        expoScheme ? `${expoScheme}://*` : undefined,
+        // Expo development deep links
+        "exp://",
+        "exp://**",
+        "exp://192.168.*.*:*/**",
+    ].filter((value) => Boolean(value));
     return betterAuth({
         database: drizzleAdapter(db, {
             provider: "pg",
@@ -18,7 +28,7 @@ export function createAuth(env) {
                 clientSecret: env.GOOGLE_CLIENT_SECRET,
             },
         },
-        trustedOrigins: ["*"],
+        trustedOrigins,
         advanced: {
             disableCSRFCheck: true,
         },

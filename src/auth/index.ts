@@ -9,10 +9,22 @@ type AuthEnv = {
   BETTER_AUTH_URL: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  EXPO_APP_SCHEME?: string;
 };
 
 export function createAuth(env: AuthEnv) {
   const db = createDb(env.DATABASE_URL);
+  const expoScheme = env.EXPO_APP_SCHEME?.trim();
+
+  const trustedOrigins = [
+    env.BETTER_AUTH_URL,
+    expoScheme ? `${expoScheme}://` : undefined,
+    expoScheme ? `${expoScheme}://*` : undefined,
+    // Expo development deep links
+    "exp://",
+    "exp://**",
+    "exp://192.168.*.*:*/**",
+  ].filter((value): value is string => Boolean(value));
 
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -30,7 +42,7 @@ export function createAuth(env: AuthEnv) {
       },
     },
 
-    trustedOrigins: ["*"],
+    trustedOrigins,
 
     advanced: {
       disableCSRFCheck: true,

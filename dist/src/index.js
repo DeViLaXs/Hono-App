@@ -9,9 +9,18 @@ app.use('*', cors({
     allowHeaders: ['Content-Type', 'Authorization'],
     allowMethods: ['GET', 'POST'],
 }));
-app.on(['POST', 'GET'], '/api/auth/*', (c) => {
-    const auth = createAuth(c.env);
-    return auth.handler(c.req.raw);
+app.on(['POST', 'GET'], '/api/auth/*', async (c) => {
+    try {
+        const auth = createAuth(c.env);
+        return await auth.handler(c.req.raw);
+    }
+    catch (error) {
+        console.error('Auth route crashed:', error);
+        return c.json({
+            error: 'Auth route internal error',
+            details: error instanceof Error ? error.message : 'Unknown auth error',
+        }, 500);
+    }
 });
 app.get('/me', async (c) => {
     const auth = createAuth(c.env);

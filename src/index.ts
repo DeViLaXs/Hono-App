@@ -9,6 +9,7 @@ type EnvBindings = {
   BETTER_AUTH_URL: string
   GOOGLE_CLIENT_ID: string
   GOOGLE_CLIENT_SECRET: string
+  EXPO_APP_SCHEME?: string
 }
 
 const app = new Hono<{ Bindings: EnvBindings }>()
@@ -22,15 +23,17 @@ app.use(
   }),
 )
 
-app.on(['POST', 'GET'], '/api/auth/*', (c) => {
+app.on(['POST', 'GET'], '/api/auth/*', async (c) => {
   try {
     const auth = createAuth(c.env)
-    return auth.handler(c.req.raw)
+    return await auth.handler(c.req.raw)
   } catch (error) {
     console.error('Auth route crashed:', error)
     return c.json(
       {
         error: 'Auth route internal error',
+        details:
+          error instanceof Error ? error.message : 'Unknown auth error',
       },
       500,
     )

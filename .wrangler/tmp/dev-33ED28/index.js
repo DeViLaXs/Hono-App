@@ -23889,10 +23889,10 @@ var init_kysely_adapter = __esm({
   }
 });
 
-// .wrangler/tmp/bundle-E5prfI/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-IlyxVr/middleware-loader.entry.ts
 init_modules_watch_stub();
 
-// .wrangler/tmp/bundle-E5prfI/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-IlyxVr/middleware-insertion-facade.js
 init_modules_watch_stub();
 
 // src/index.ts
@@ -60278,6 +60278,16 @@ var games = pgTable("games", {
 // src/auth/index.ts
 function createAuth(env2) {
   const db = createDb(env2.DATABASE_URL);
+  const expoScheme = env2.EXPO_APP_SCHEME?.trim();
+  const trustedOrigins = [
+    env2.BETTER_AUTH_URL,
+    expoScheme ? `${expoScheme}://` : void 0,
+    expoScheme ? `${expoScheme}://*` : void 0,
+    // Expo development deep links
+    "exp://",
+    "exp://**",
+    "exp://192.168.*.*:*/**"
+  ].filter((value) => Boolean(value));
   return betterAuth({
     database: drizzleAdapter(db, {
       provider: "pg",
@@ -60291,7 +60301,7 @@ function createAuth(env2) {
         clientSecret: env2.GOOGLE_CLIENT_SECRET
       }
     },
-    trustedOrigins: ["*"],
+    trustedOrigins,
     advanced: {
       disableCSRFCheck: true
     },
@@ -60312,15 +60322,16 @@ app.use(
     allowMethods: ["GET", "POST"]
   })
 );
-app.on(["POST", "GET"], "/api/auth/*", (c) => {
+app.on(["POST", "GET"], "/api/auth/*", async (c) => {
   try {
     const auth = createAuth(c.env);
-    return auth.handler(c.req.raw);
+    return await auth.handler(c.req.raw);
   } catch (error3) {
     console.error("Auth route crashed:", error3);
     return c.json(
       {
-        error: "Auth route internal error"
+        error: "Auth route internal error",
+        details: error3 instanceof Error ? error3.message : "Unknown auth error"
       },
       500
     );
@@ -60400,7 +60411,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env2, _ctx, middlewareCtx
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// .wrangler/tmp/bundle-E5prfI/middleware-insertion-facade.js
+// .wrangler/tmp/bundle-IlyxVr/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -60433,7 +60444,7 @@ function __facade_invoke__(request, env2, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// .wrangler/tmp/bundle-E5prfI/middleware-loader.entry.ts
+// .wrangler/tmp/bundle-IlyxVr/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
